@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Senith Wijesinghe | Command Center</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: {
+              950: '#070a10',
+              900: '#0b0f17',
+              850: '#111726',
+              800: '#172033',
+              750: '#1e293b',
+              700: '#334155'
+            },
+            accent: {
+              blue: '#0284c7',
+              indigo: '#6366f1',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['"SF Mono"', 'Menlo', 'Monaco', '"Courier New"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* iOS Safe Area Insets & Momentum Scrolling */
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+    body {
+      padding-top: var(--sat);
+      padding-bottom: calc(var(--sab) + 72px); /* Mobile nav clearance */
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    @media (min-width: 768px) {
+      body {
+        padding-bottom: var(--sab);
+      }
+    }
+    .safe-bottom {
+      padding-bottom: var(--sab);
+    }
+    .smooth-scroll {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .smooth-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .tactile-btn {
+      transition: transform 0.12s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease;
+    }
+    .tactile-btn:active {
+      transform: scale(0.96);
+    }
+    /* Hide scrollbars but keep functionality */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-obsidian-950 text-slate-100 min-h-screen flex flex-col font-sans transition-colors selection:bg-indigo-500/30 selection:text-indigo-200">
+
+  <!-- Desktop & Tablet Header -->
+  <header class="sticky top-0 z-30 bg-obsidian-900/90 backdrop-blur-xl border-b border-obsidian-750 px-4 md:px-8 py-3 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <!-- User ID / Brand Info -->
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 via-indigo-600 to-emerald-500 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center">
+          <div class="w-full h-full bg-obsidian-900 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="cpu" class="w-5 h-5 text-sky-400"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sm text-white tracking-tight">Senith Wijesinghe</span>
+            <span class="text-[10px] uppercase font-mono font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+              Stage 3 CS • Newcastle
+            </span>
+          </div>
+          <div class="text-[11px] text-slate-400 font-mono">ID: 240532769 • Urban Sciences Bldg</div>
+        </div>
+      </div>
+
+      <!-- Desktop Navigation Tabs (Hidden on mobile) -->
+      <nav class="hidden md:flex items-center gap-1 bg-obsidian-850 p-1 rounded-xl border border-obsidian-750">
+        <button onclick="switchTab('timetable')" id="tab-btn-timetable-dt" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition text-white bg-indigo-600 shadow-sm">
+          <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+          <span>Timetable</span>
+        </button>
+        <button onclick="switchTab('tasks')" id="tab-btn-tasks-dt" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-obsidian-800 flex items-center gap-1.5 transition">
+          <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+          <span>Tasks & Grad</span>
+        </button>
+        <button onclick="switchTab('hardware')" id="tab-btn-hardware-dt" class="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-obsidian-800 flex items-center gap-1.5 transition">
+          <i data-lucide="wrench" class="w-3.5 h-3.5"></i>
+          <span>Hardware & Scratchpad</span>
+        </button>
+      </nav>
+
+      <!-- Sync & Action Controls -->
+      <div class="flex items-center space-x-2">
+        <button onclick="syncAllFeeds()" id="syncBtn" class="tactile-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-medium shadow-sm transition">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="syncIcon"></i>
+          <span class="hidden sm:inline">Sync Feeds</span>
+        </button>
+
+        <button onclick="openSyncModal()" class="tactile-btn p-2 rounded-xl bg-obsidian-850 hover:bg-obsidian-800 border border-obsidian-750 text-slate-300 text-xs font-medium transition" title="Feed Settings & ICS">
+          <i data-lucide="settings-2" class="w-4 h-4"></i>
+        </button>
+
+        <button onclick="openNewTaskModal()" class="tactile-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-md shadow-sky-600/20 transition">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">New Item</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notification Banner (Displays Sync State or Live Countdown) -->
+  <div id="liveBanner" class="bg-gradient-to-r from-indigo-950/80 via-obsidian-900 to-sky-950/80 border-b border-obsidian-750/60 px-4 py-2 text-xs">
+    <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span id="nextUpcomingText" class="text-slate-300 font-medium truncate max-w-[280px] sm:max-w-md">
+          Next: CSC3123 Embedded Architecture • 10:00 AM (USB 2.014)
+        </span>
+      </div>
+      <div class="flex items-center gap-2 text-slate-400 font-mono text-[11px]">
+        <span id="lastSyncedLabel">Feeds connected: NCL + Canvas</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Primary App Body -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6">
+
+    <!-- ================================================================= -->
+    <!-- VIEW 1: DEDICATED TIMETABLE TAB                                   -->
+    <!-- ================================================================= -->
+    <section id="view-timetable" class="space-y-4">
+      
+      <!-- Timetable Header Bar with Sub-View Switchers -->
+      <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+        
+        <!-- Left: Sub-View Toggles (Today / Week Grid / Agenda List) -->
+        <div class="flex items-center p-1 bg-obsidian-850 rounded-xl border border-obsidian-750 w-full sm:w-auto">
+          <button onclick="setTimetableView('day')" id="tt-sub-day" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition tactile-btn flex items-center justify-center gap-1.5">
+            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+            <span>Today</span>
+          </button>
+          <button onclick="setTimetableView('week')" id="tt-sub-week" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition tactile-btn flex items-center justify-center gap-1.5">
+            <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+            <span>Weekly Grid</span>
+          </button>
+          <button onclick="setTimetableView('agenda')" id="tt-sub-agenda" class="flex-1 sm:flex-none px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition tactile-btn flex items-center justify-center gap-1.5">
+            <i data-lucide="list" class="w-3.5 h-3.5"></i>
+            <span>Full Agenda</span>
+          </button>
+        </div>
+
+        <!-- Filter Dropdown & Search -->
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="relative flex-1 sm:w-64">
+            <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="ttSearchInput" oninput="renderTimetable()" placeholder="Filter module, venue, code..." class="w-full bg-obsidian-850 border border-obsidian-750 rounded-xl pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+          </div>
+          <select id="ttCategoryFilter" onchange="renderTimetable()" class="bg-obsidian-850 border border-obsidian-750 rounded-xl px-2.5 py-1.5 text-xs text-slate-300 focus:outline-none">
+            <option value="all">All Events</option>
+            <option value="lecture">Lectures & Labs</option>
+            <option value="deadline">Canvas Deadlines</option>
+            <option value="fyp">FYP / Capstone</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW A: TODAY / DAY VIEW (Touch-friendly horizontal date bar + Chronological Cards) -->
+      <div id="tt-view-day-container" class="space-y-4">
+        
+        <!-- iPhone Horizontal Day-Picker Bar -->
+        <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-2.5 overflow-hidden">
+          <div class="flex items-center justify-between pb-2 px-1 border-b border-obsidian-800 mb-2">
+            <div class="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span id="selectedDayLabel">Wednesday, 4 Nov</span>
+            </div>
+            <button onclick="goToToday()" class="text-[11px] font-mono text-indigo-400 hover:text-indigo-300 px-2 py-0.5 rounded bg-indigo-500/10">Jump to Today</button>
+          </div>
+          
+          <!-- Horizontal Swipe Day Pills -->
+          <div class="flex items-center gap-1.5 overflow-x-auto smooth-scroll py-1" id="dayPillsContainer">
+            <!-- Dynamically generated 14-day rolling window pills -->
+          </div>
+        </div>
+
+        <!-- Today "Now & Next" Dynamic Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="nowNextContainer">
+          <!-- Populated dynamically: Shows current lecture/lab and the immediate next session -->
+        </div>
+
+        <!-- Hourly Schedule Stack for Selected Date -->
+        <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-sky-400"></i> Scheduled Sessions & Milestones
+            </h3>
+            <span id="dayEventsCount" class="text-[11px] font-mono text-slate-400">0 events</span>
+          </div>
+          <div id="dayEventsList" class="space-y-2.5">
+            <!-- Chronological items loaded here -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SUB-VIEW B: WEEKLY RESPONSIVE GRID -->
+      <div id="tt-view-week-container" class="hidden space-y-3">
+        <div class="flex items-center justify-between bg-obsidian-900 border border-obsidian-750 rounded-xl px-4 py-2.5">
+          <button onclick="shiftWeek(-1)" class="tactile-btn p-1.5 rounded-lg bg-obsidian-850 hover:bg-obsidian-800 text-slate-300">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+          <span id="weekRangeHeader" class="text-xs font-bold text-white font-mono">Mon 2 Nov – Sun 8 Nov</span>
+          <button onclick="shiftWeek(1)" class="tactile-btn p-1.5 rounded-lg bg-obsidian-850 hover:bg-obsidian-800 text-slate-300">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- 7-Column Responsive Layout (Mobile horizontally scrolls smoothly) -->
+        <div class="overflow-x-auto smooth-scroll pb-2">
+          <div class="grid grid-cols-7 gap-2.5 min-w-[760px] md:min-w-0" id="weeklyGridColumns">
+            <!-- Columns Monday through Sunday generated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW C: FULL AGENDA LIST -->
+      <div id="tt-view-agenda-container" class="hidden space-y-3">
+        <div id="agendaCardsList" class="space-y-2.5">
+          <!-- All events chronological scroll -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 2: TASKS & GRADUATE APPLICATIONS                             -->
+    <!-- ================================================================= -->
+    <section id="view-tasks" class="hidden space-y-4">
+      
+      <!-- Metrics Overview -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-3.5">
+          <div class="text-[11px] text-slate-400 font-medium">Pending Tasks</div>
+          <div class="text-xl font-bold text-white mt-1" id="statPendingTasks">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Across all categories</div>
+        </div>
+        <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-3.5">
+          <div class="text-[11px] text-amber-400 font-medium">Grad Applications</div>
+          <div class="text-xl font-bold text-amber-400 mt-1" id="statGradApps">3 Active</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Arm, MBDA, Leonardo</div>
+        </div>
+        <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-3.5">
+          <div class="text-[11px] text-indigo-400 font-medium">CSC3001 Capstone</div>
+          <div class="text-xl font-bold text-indigo-300 mt-1" id="statFypProgress">40%</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">POSIX IPC & Benchmarking</div>
+        </div>
+        <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-3.5">
+          <div class="text-[11px] text-emerald-400 font-medium">Completed</div>
+          <div class="text-xl font-bold text-emerald-400 mt-1" id="statDoneTasks">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Archived items</div>
+        </div>
+      </div>
+
+      <!-- Task Category Filters -->
+      <div class="flex items-center gap-2 overflow-x-auto smooth-scroll py-1">
+        <button onclick="setTaskCategory('all')" class="task-cat-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white whitespace-nowrap tactile-btn" data-cat="all">All Items</button>
+        <button onclick="setTaskCategory('grad')" class="task-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-obsidian-900 border border-obsidian-750 whitespace-nowrap tactile-btn" data-cat="grad">Arm & Embedded Grad</button>
+        <button onclick="setTaskCategory('uni')" class="task-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-obsidian-900 border border-obsidian-750 whitespace-nowrap tactile-btn" data-cat="uni">CSC3001 & Modules</button>
+        <button onclick="setTaskCategory('venture')" class="task-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-obsidian-900 border border-obsidian-750 whitespace-nowrap tactile-btn" data-cat="venture">Hardware Ventures</button>
+        <button onclick="setTaskCategory('personal')" class="task-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 hover:text-white bg-obsidian-900 border border-obsidian-750 whitespace-nowrap tactile-btn" data-cat="personal">Personal / Admin</button>
+      </div>
+
+      <!-- Tasks List Stack -->
+      <div id="tasksListContainer" class="space-y-3">
+        <!-- Rendered dynamically -->
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 3: HARDWARE VENTURE & TERMINAL SCRATCHPAD                    -->
+    <!-- ================================================================= -->
+    <section id="view-hardware" class="hidden space-y-4">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <!-- Left: Quick Low-Level Cheatsheet & Terminal Reference -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-4 space-y-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="cpu" class="w-4 h-4 text-emerald-400"></i> Embedded & C Flags Quick Reference
+            </h3>
+            <div class="space-y-2 text-xs font-mono text-slate-300">
+              <div class="bg-obsidian-950 p-2.5 rounded-xl border border-obsidian-800">
+                <div class="text-[10px] text-slate-500 uppercase font-sans font-bold">POSIX IPC / GCC Compile</div>
+                <div class="text-emerald-400 select-all">gcc -Wall -Wextra -pthread -lrt -O2 main.c -o ipc_runner</div>
+              </div>
+              <div class="bg-obsidian-950 p-2.5 rounded-xl border border-obsidian-800">
+                <div class="text-[10px] text-slate-500 uppercase font-sans font-bold">GDB Shared Memory Check</div>
+                <div class="text-sky-400 select-all">(gdb) info proc mappings<br>(gdb) x/32xw &amp;shared_queue</div>
+              </div>
+              <div class="bg-obsidian-950 p-2.5 rounded-xl border border-obsidian-800">
+                <div class="text-[10px] text-slate-500 uppercase font-sans font-bold">Hardware Teardown Spec (OLED / Kiosk)</div>
+                <div class="text-amber-400">Heat plate: 80°C • 99% IPA • Flex ribbon bend &gt; 1.2mm</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Venture Tracker -->
+          <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl p-4 space-y-2.5">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <i data-lucide="trending-up" class="w-4 h-4 text-indigo-400"></i> Summer/Current Ventures
+            </h3>
+            <ul class="text-xs text-slate-400 space-y-2">
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                <span><strong>Device Flipping:</strong> Sourcing grade C OLED screens for glass refurbishment (zero car mileage).</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-indigo-400 mt-0.5 flex-shrink-0"></i>
+                <span><strong>Game Server Host:</strong> 128-tick bare metal Linux kernel tuning &amp; BBR setup.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0"></i>
+                <span><strong>Fleet Integration:</strong> EPOS till configuration, static IP routing (FireflyApps skillset).</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Right: Persistent Multi-Device Scratchpad -->
+        <div class="lg:col-span-7 flex flex-col bg-obsidian-900 border border-obsidian-750 rounded-2xl p-4">
+          <div class="flex items-center justify-between pb-3 border-b border-obsidian-750 mb-3">
+            <div>
+              <h3 class="text-xs font-bold text-white flex items-center gap-2">
+                <i data-lucide="terminal" class="w-4 h-4 text-sky-400"></i> Hardware & Systems Scratchpad
+              </h3>
+              <p class="text-[11px] text-slate-400">Auto-saved to device localStorage. Export anytime to sync with iPhone.</p>
+            </div>
+            <span id="scratchSaveIndicator" class="text-[10px] font-mono text-emerald-400">Saved</span>
+          </div>
+
+          <textarea id="hardwareScratchpad" oninput="saveScratchpad()" placeholder="Register maps, ARM Cortex-M interrupt tables, network routing commands, customer quotes..." class="flex-1 min-h-[360px] w-full bg-obsidian-950 border border-obsidian-800 rounded-xl p-3 text-xs font-mono text-slate-200 leading-relaxed focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR (iPhone Optimized with Safe Area)   -->
+  <!-- ================================================================= -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-obsidian-900/95 backdrop-blur-xl border-t border-obsidian-750 px-3 pt-2 pb-2 safe-bottom shadow-2xl">
+    <div class="flex items-center justify-around">
+      <button onclick="switchTab('timetable')" id="tab-btn-timetable-mb" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-indigo-400 transition tactile-btn">
+        <i data-lucide="calendar" class="w-5 h-5"></i>
+        <span class="text-[10px] font-semibold">Timetable</span>
+      </button>
+
+      <button onclick="switchTab('tasks')" id="tab-btn-tasks-mb" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 transition tactile-btn">
+        <i data-lucide="check-square" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Tasks</span>
+      </button>
+
+      <button onclick="openNewTaskModal()" class="flex flex-col items-center justify-center -mt-4 w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white shadow-lg shadow-indigo-600/40 transition tactile-btn">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+      </button>
+
+      <button onclick="syncAllFeeds()" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 transition tactile-btn">
+        <i data-lucide="refresh-cw" class="w-5 h-5" id="mbSyncIcon"></i>
+        <span class="text-[10px] font-medium">Sync</span>
+      </button>
+
+      <button onclick="switchTab('hardware')" id="tab-btn-hardware-mb" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 transition tactile-btn">
+        <i data-lucide="wrench" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Lab / Notes</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: SYNC & CALENDAR FEED CONFIGURATION                         -->
+  <!-- ================================================================= -->
+  <div id="syncModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
+    <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl w-full max-w-lg shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-obsidian-750">
+        <div class="flex items-center gap-2">
+          <i data-lucide="rss" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="text-sm font-bold text-white">Live Feeds & Calendar Sync</h3>
+        </div>
+        <button onclick="closeSyncModal()" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Feed URLs -->
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Newcastle Timetable (iCal Feed URL)</label>
+          <input type="text" id="nclFeedUrl" value="https://m.ncl.ac.uk/itservice/ical/ical.php?personal=240532769&type=C;F;H;L;P;S;T;V;W;A;SO" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-slate-200 font-mono text-[11px] focus:outline-none focus:border-indigo-500">
+        </div>
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Newcastle Canvas LMS (Assignment & Calendar Feed)</label>
+          <input type="text" id="canvasFeedUrl" value="https://ncl.instructure.com/feeds/calendars/user_GEWtrTqJwiB0wetVpd2wBBD3TeP473e5oxyfzliK.ics" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-slate-200 font-mono text-[11px] focus:outline-none focus:border-indigo-500">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col sm:flex-row gap-2 pt-2">
+        <button onclick="syncAllFeeds()" class="tactile-btn flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync Now via Web Proxy
+        </button>
+      </div>
+
+      <!-- Manual ICS Upload Fallback -->
+      <div class="border-t border-obsidian-800 pt-3 space-y-2">
+        <label class="block text-xs font-medium text-slate-400">Offline / Direct .ICS File Upload</label>
+        <p class="text-[11px] text-slate-500">If campus Wi-Fi or Newcastle SSO blocks CORS proxy, upload downloaded .ics files directly:</p>
+        <div class="flex items-center gap-2">
+          <input type="file" id="icsFileInput" accept=".ics" onchange="handleIcsUpload(event)" class="text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-obsidian-800 file:text-slate-200 hover:file:bg-obsidian-750">
+        </div>
+      </div>
+
+      <!-- JSON Continuity Backup -->
+      <div class="border-t border-obsidian-800 pt-3 flex items-center justify-between text-xs">
+        <span class="text-slate-400">Cross-Device JSON Sync:</span>
+        <div class="flex gap-2">
+          <button onclick="exportBackup()" class="px-2.5 py-1 bg-obsidian-800 hover:bg-obsidian-750 text-slate-200 rounded-lg">Export</button>
+          <label class="px-2.5 py-1 bg-obsidian-800 hover:bg-obsidian-750 text-slate-200 rounded-lg cursor-pointer">
+            Import <input type="file" accept=".json" onchange="importBackup(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- MODAL: CREATE NEW ITEM / DEADLINE / TASK                          -->
+  <!-- ================================================================= -->
+  <div id="newTaskModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm hidden">
+    <div class="bg-obsidian-900 border border-obsidian-750 rounded-2xl w-full max-w-md shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-obsidian-750">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-sky-400"></i> Add Activity / Task
+        </h3>
+        <button onclick="closeNewTaskModal()" class="p-1 rounded-lg text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="newItemForm" onsubmit="handleNewItemSubmit(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Title *</label>
+          <input type="text" id="itemTitle" required placeholder="e.g. CSC3121 Practical 1 Submission" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Type</label>
+            <select id="itemType" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+              <option value="lecture">Lecture / Lab</option>
+              <option value="deadline">Coursework Deadline</option>
+              <option value="grad">Grad Application</option>
+              <option value="venture">Hardware Venture</option>
+              <option value="personal">Personal</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Priority</label>
+            <select id="itemPriority" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+              <option value="High">🔥 High</option>
+              <option value="Medium" selected>⚡ Medium</option>
+              <option value="Low">🌱 Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Date</label>
+            <input type="date" id="itemDate" required class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-400 font-medium mb-1">Time</label>
+            <input type="time" id="itemTime" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Location / Venue</label>
+          <input type="text" id="itemLocation" placeholder="e.g. Urban Sciences Building 2.014" class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl px-3 py-2 text-white focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-slate-400 font-medium mb-1">Notes / Instructions</label>
+          <textarea id="itemNotes" rows="2" placeholder="Coursework spec, pinouts, or links..." class="w-full bg-obsidian-950 border border-obsidian-800 rounded-xl p-2.5 text-white focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeNewTaskModal()" class="px-3.5 py-2 rounded-xl text-slate-400 hover:text-white">Cancel</button>
+          <button type="submit" class="tactile-btn px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow">Add Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- TOAST NOTIFICATION                                                -->
+  <!-- ================================================================= -->
+  <div id="toast" class="fixed bottom-20 md:bottom-6 right-4 z-50 transform translate-y-16 opacity-0 transition-all duration-300 bg-obsidian-800 border border-obsidian-750 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 text-xs pointer-events-none">
+    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMessage">Done</span>
+  </div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script>
+    // Initial Realistic Newcastle Year 3 CS Data & Hardware Targets
+    const INITIAL_EVENTS = [
+      {
+        id: "evt-1",
+        title: "CSC3123 Embedded Systems Architecture (ARM & RTOS)",
+        type: "lecture",
+        date: "2026-11-04", // Today
+        startTime: "10:00",
+        endTime: "12:00",
+        location: "Urban Sciences Building 2.014",
+        category: "uni",
+        priority: "High",
+        notes: "Real-time task scheduling, priority inversion mitigation, and RTOS timer interrupts."
+      },
+      {
+        id: "evt-2",
+        title: "CSC3001 Capstone: Supervisor Progress Check-in",
+        type: "fyp",
+        date: "2026-11-04", // Today
+        startTime: "14:00",
+        endTime: "14:30",
+        location: "USB Staff Office / Teams",
+        category: "fyp",
+        priority: "High",
+        notes: "Review POSIX shared memory vs message queues benchmark results."
+      },
+      {
+        id: "evt-3",
+        title: "CSC3121 Distributed Systems: Consistency Models",
+        type: "lecture",
+        date: "2026-11-05", // Tomorrow
+        startTime: "09:00",
+        endTime: "11:00",
+        location: "USB G.003",
+        category: "uni",
+        priority: "Medium",
+        notes: "Paxos, Raft consensus algorithms, and vector clocks."
+      },
+      {
+        id: "evt-4",
+        title: "Canvas: CSC3121 Practical 1 Submission Cutoff",
+        type: "deadline",
+        date: "2026-11-06",
+        startTime: "16:00",
+        endTime: "16:00",
+        location: "Canvas Submission Portal",
+        category: "uni",
+        priority: "High",
+        notes: "Submit RPC client-server implementation with error boundary tests."
+      },
+      {
+        id: "evt-5",
+        title: "Arm Cambridge: Graduate Firmware Application Closes",
+        type: "grad",
+        date: "2026-11-09",
+        startTime: "23:59",
+        endTime: "23:59",
+        location: "Arm Careers Portal",
+        category: "grad",
+        priority: "High",
+        notes: "Systems verification and embedded C firmware track. Emphasize POSIX IPC and FireflyApps EPOS QA."
+      },
+      {
+        id: "evt-6",
+        title: "CSC3122 Mobile Computer Systems: Hardware Practical",
+        type: "lecture",
+        date: "2026-11-06",
+        startTime: "13:00",
+        endTime: "15:00",
+        location: "USB Mac Lab 2.022",
+        category: "uni",
+        priority: "Medium",
+        notes: "Android BLE peripheral discovery and sensor HAL integration."
+      }
+    ];
+
+    const INITIAL_TASKS = [
+      {
+        id: "task-1",
+        title: "Submit Arm Cambridge Graduate Scheme Application",
+        category: "grad",
+        priority: "High",
+        dueDate: "2026-11-09",
+        completed: false,
+        subtasks: [
+          { text: "Lead with C/POSIX shared memory project above web stack", done: true },
+          { text: "Detail Android hardware fleet static IP configuration", done: true },
+          { text: "Submit technical reasoning assessment", done: false }
+        ]
+      },
+      {
+        id: "task-2",
+        title: "CSC3001 Dissertation: Finalize Literature Review Chapter",
+        category: "uni",
+        priority: "High",
+        dueDate: "2026-11-15",
+        completed: false,
+        subtasks: [
+          { text: "Collate 15 papers on zero-copy IPC latency in microkernels", done: true },
+          { text: "Synthesize memory safety trade-offs (C vs Rust)", done: false }
+        ]
+      },
+      {
+        id: "task-3",
+        title: "Hardware Venture: Bench-test Refurbished OLED Display",
+        category: "venture",
+        priority: "Medium",
+        dueDate: "2026-11-07",
+        completed: false,
+        subtasks: [
+          { text: "Inspect display ribbon under microscope", done: true },
+          { text: "Heat plate lamination at 80C", done: false }
+        ]
+      },
+      {
+        id: "task-4",
+        title: "MBDA & Leonardo Systems Integration Schemes",
+        category: "grad",
+        priority: "Medium",
+        dueDate: "2026-11-20",
+        completed: false,
+        subtasks: [
+          { text: "Tailor Hardware-in-the-Loop test bench experience", done: false }
+        ]
+      }
+    ];
+
+    // State Variables
+    let events = [];
+    let tasks = [];
+    let activeTab = 'timetable';
+    let timetableView = 'day'; // 'day', 'week', 'agenda'
+    let selectedDate = "2026-11-04"; // Initial date
+    let currentWeekOffset = 0;
+    let selectedTaskCategory = 'all';
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      loadStorage();
+      initDayPills();
+      renderAll();
+      initLucide();
+    });
+
+    function initLucide() {
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    function loadStorage() {
+      const storedEvents = localStorage.getItem('senith_events');
+      events = storedEvents ? JSON.parse(storedEvents) : [...INITIAL_EVENTS];
+
+      const storedTasks = localStorage.getItem('senith_tasks');
+      tasks = storedTasks ? JSON.parse(storedTasks) : [...INITIAL_TASKS];
+
+      const storedScratch = localStorage.getItem('senith_scratchpad');
+      if (storedScratch !== null) {
+        document.getElementById('hardwareScratchpad').value = storedScratch;
+      } else {
+        document.getElementById('hardwareScratchpad').value = 
+`// Newcastle CS Stage 3 & Hardware Notes
+// GCC Build with low-latency POSIX runtime:
+gcc -Wall -Wextra -pthread -lrt -O2 main.c -o test_ipc
+
+// GDB Memory Debugging:
+(gdb) x/16xw 0x7fffffffe000
+(gdb) info proc mappings
+
+// Hardware Station Config:
+Heat plate separator: 80°C (3-4 mins for OCA softening)
+Doncaster / Spital Tongues lab setup`;
+      }
+    }
+
+    function persistData() {
+      localStorage.setItem('senith_events', JSON.stringify(events));
+      localStorage.setItem('senith_tasks', JSON.stringify(tasks));
+      updateMetrics();
+    }
+
+    function saveScratchpad() {
+      const val = document.getElementById('hardwareScratchpad').value;
+      localStorage.setItem('senith_scratchpad', val);
+      const ind = document.getElementById('scratchSaveIndicator');
+      ind.innerText = 'Saving...';
+      setTimeout(() => { ind.innerText = 'Saved'; }, 400);
+    }
+
+    // Top Level Tab Navigation
+    function switchTab(tabId) {
+      activeTab = tabId;
+      ['timetable', 'tasks', 'hardware'].forEach(t => {
+        const viewEl = document.getElementById(`view-${t}`);
+        const dtBtn = document.getElementById(`tab-btn-${t}-dt`);
+        const mbBtn = document.getElementById(`tab-btn-${t}-mb`);
+
+        if (t === tabId) {
+          viewEl.classList.remove('hidden');
+          if (dtBtn) {
+            dtBtn.classList.add('bg-indigo-600', 'text-white');
+            dtBtn.classList.remove('text-slate-300');
+          }
+          if (mbBtn) {
+            mbBtn.classList.add('text-indigo-400');
+            mbBtn.classList.remove('text-slate-400');
+          }
+        } else {
+          viewEl.classList.add('hidden');
+          if (dtBtn) {
+            dtBtn.classList.remove('bg-indigo-600', 'text-white');
+            dtBtn.classList.add('text-slate-300');
+          }
+          if (mbBtn) {
+            mbBtn.classList.remove('text-indigo-400');
+            mbBtn.classList.add('text-slate-400');
+          }
+        }
+      });
+      initLucide();
+    }
+
+    // Sub-view Navigation in Timetable
+    function setTimetableView(view) {
+      timetableView = view;
+      ['day', 'week', 'agenda'].forEach(v => {
+        const container = document.getElementById(`tt-view-${v}-container`);
+        const btn = document.getElementById(`tt-sub-${v}`);
+        if (v === view) {
+          container.classList.remove('hidden');
+          btn.classList.add('bg-indigo-600', 'text-white');
+          btn.classList.remove('text-slate-300');
+        } else {
+          container.classList.add('hidden');
+          btn.classList.remove('bg-indigo-600', 'text-white');
+          btn.classList.add('text-slate-300');
+        }
+      });
+      renderTimetable();
+      initLucide();
+    }
+
+    // Rolling 14-day Pill Generator for iPhone
+    function initDayPills() {
+      const container = document.getElementById('dayPillsContainer');
+      container.innerHTML = '';
+      
+      const baseDate = new Date("2026-11-04T00:00:00");
+      
+      for (let i = -2; i < 12; i++) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() + i);
+        
+        const dateStr = d.toISOString().split('T')[0];
+        const dayName = d.toLocaleDateString('en-GB', { weekday: 'short' });
+        const dayNum = d.getDate();
+        const isSelected = (dateStr === selectedDate);
+        const isToday = (i === 0);
+
+        const pill = document.createElement('button');
+        pill.onclick = () => selectDay(dateStr);
+        pill.className = `tactile-btn flex-shrink-0 flex flex-col items-center py-2 px-3.5 rounded-xl border text-xs transition ${
+          isSelected 
+            ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30' 
+            : 'bg-obsidian-850 text-slate-300 border-obsidian-750 hover:border-slate-600'
+        }`;
+        pill.innerHTML = `
+          <span class="text-[10px] font-medium uppercase ${isSelected ? 'text-indigo-200' : 'text-slate-400'}">${dayName}</span>
+          <span class="text-sm font-bold font-mono mt-0.5">${dayNum}</span>
+          ${isToday ? '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1"></span>' : '<span class="w-1.5 h-1.5 mt-1"></span>'}
+        `;
+        container.appendChild(pill);
+      }
+    }
+
+    function selectDay(dateStr) {
+      selectedDate = dateStr;
+      const d = new Date(dateStr + "T00:00:00");
+      document.getElementById('selectedDayLabel').innerText = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+      initDayPills();
+      renderTimetable();
+      initLucide();
+    }
+
+    function goToToday() {
+      selectDay("2026-11-04");
+    }
+
+    // Weekly Grid View Renderer
+    function renderWeeklyGrid() {
+      const container = document.getElementById('weeklyGridColumns');
+      container.innerHTML = '';
+
+      const base = new Date("2026-11-02T00:00:00"); // Base Monday
+      base.setDate(base.getDate() + (currentWeekOffset * 7));
+
+      const endWeek = new Date(base);
+      endWeek.setDate(base.getDate() + 6);
+
+      document.getElementById('weekRangeHeader').innerText = 
+        `${base.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} – ${endWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+
+      const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+      for (let i = 0; i < 7; i++) {
+        const cur = new Date(base);
+        cur.setDate(base.getDate() + i);
+        const curIso = cur.toISOString().split('T')[0];
+        const dayEvts = events.filter(e => e.date === curIso);
+
+        const col = document.createElement('div');
+        col.className = 'bg-obsidian-850 border border-obsidian-750 rounded-xl p-2.5 flex flex-col min-h-[300px] space-y-2';
+        col.innerHTML = `
+          <div class="flex items-center justify-between pb-1.5 border-b border-obsidian-800">
+            <span class="text-xs font-bold ${curIso === selectedDate ? 'text-indigo-400' : 'text-slate-300'}">${dayNames[i]}</span>
+            <span class="text-[11px] font-mono text-slate-400">${cur.getDate()}</span>
+          </div>
+          <div class="space-y-1.5 flex-1">
+            ${dayEvts.length === 0 ? '<div class="text-[10px] text-slate-600 text-center py-6 italic">No classes</div>' : ''}
+            ${dayEvts.map(ev => `
+              <div class="p-2 rounded-lg bg-obsidian-900 border ${getEventBorder(ev.type)} text-[11px] space-y-1">
+                <div class="font-bold text-white leading-tight line-clamp-2">${escapeHtml(ev.title)}</div>
+                <div class="text-[10px] font-mono text-indigo-300 flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3 h-3"></i> ${ev.startTime || 'TBD'}
+                </div>
+                ${ev.location ? `<div class="text-[10px] text-slate-400 truncate">${escapeHtml(ev.location)}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(col);
+      }
+    }
+
+    function shiftWeek(dir) {
+      currentWeekOffset += dir;
+      renderWeeklyGrid();
+      initLucide();
+    }
+
+    // Render Timetable Views
+    function renderTimetable() {
+      const q = (document.getElementById('ttSearchInput')?.value || '').toLowerCase();
+      const cat = document.getElementById('ttCategoryFilter')?.value || 'all';
+
+      // Filtered Events
+      const filtered = events.filter(e => {
+        if (cat !== 'all' && e.type !== cat && !(cat === 'fyp' && e.category === 'fyp')) return false;
+        if (q) {
+          const match = (e.title || '').toLowerCase().includes(q) || 
+                        (e.location || '').toLowerCase().includes(q) ||
+                        (e.notes || '').toLowerCase().includes(q);
+          if (!match) return false;
+        }
+        return true;
+      });
+
+      // 1. Day View rendering
+      const dayList = document.getElementById('dayEventsList');
+      const nowNext = document.getElementById('nowNextContainer');
+      const dayEvents = filtered.filter(e => e.date === selectedDate)
+                                .sort((a,b) => (a.startTime || '').localeCompare(b.startTime || ''));
+
+      document.getElementById('dayEventsCount').innerText = `${dayEvents.length} session${dayEvents.length === 1 ? '' : 's'}`;
+
+      if (dayEvents.length === 0) {
+        dayList.innerHTML = `
+          <div class="text-center py-10 bg-obsidian-950/50 rounded-xl border border-dashed border-obsidian-800">
+            <i data-lucide="coffee" class="w-8 h-8 text-slate-600 mx-auto mb-2"></i>
+            <p class="text-xs text-slate-400">No university classes or deadlines on this date.</p>
+          </div>
+        `;
+      } else {
+        dayList.innerHTML = dayEvents.map(e => `
+          <div class="p-3 sm:p-4 rounded-xl bg-obsidian-850 border ${getEventBorder(e.type)} flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${getEventBg(e.type)}">
+                <i data-lucide="${getEventIcon(e.type)}" class="w-5 h-5 ${getEventTextColor(e.type)}"></i>
+              </div>
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-bold text-white">${escapeHtml(e.title)}</span>
+                  ${getTypeBadge(e.type)}
+                </div>
+                <div class="flex items-center gap-3 text-xs text-slate-400 flex-wrap">
+                  <span class="font-mono text-indigo-300 flex items-center gap-1">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i> ${e.startTime} ${e.endTime ? '– ' + e.endTime : ''}
+                  </span>
+                  ${e.location ? `
+                    <span class="flex items-center gap-1 text-slate-300">
+                      <i data-lucide="map-pin" class="w-3.5 h-3.5 text-sky-400"></i> ${escapeHtml(e.location)}
+                    </span>
+                  ` : ''}
+                </div>
+                ${e.notes ? `<p class="text-[11px] text-slate-400 mt-1">${escapeHtml(e.notes)}</p>` : ''}
+              </div>
+            </div>
+            <button onclick="deleteEvent('${e.id}')" class="text-slate-500 hover:text-rose-400 self-end sm:self-center p-1">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      // Now & Next Indicators
+      if (dayEvents.length > 0) {
+        const first = dayEvents[0];
+        const second = dayEvents[1] || null;
+        nowNext.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-gradient-to-br from-indigo-950/60 to-obsidian-900 border border-indigo-500/30">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1">
+              <i data-lucide="radio" class="w-3 h-3 text-emerald-400 animate-pulse"></i> Next On Schedule
+            </div>
+            <div class="text-sm font-bold text-white mt-1 truncate">${escapeHtml(first.title)}</div>
+            <div class="text-xs text-indigo-200 mt-0.5 flex items-center gap-2">
+              <span>${first.startTime}</span> • <span>${escapeHtml(first.location || 'Urban Sciences Bldg')}</span>
+            </div>
+          </div>
+          <div class="p-3.5 rounded-xl bg-obsidian-850 border border-obsidian-750">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Following Session</div>
+            ${second ? `
+              <div class="text-sm font-bold text-slate-200 mt-1 truncate">${escapeHtml(second.title)}</div>
+              <div class="text-xs text-slate-400 mt-0.5 flex items-center gap-2">
+                <span>${second.startTime}</span> • <span>${escapeHtml(second.location || 'USB')}</span>
+              </div>
+            ` : '<div class="text-xs text-slate-500 mt-2 italic">Nothing further scheduled today</div>'}
+          </div>
+        `;
+      } else {
+        nowNext.innerHTML = '';
+      }
+
+      // 2. Week Grid
+      renderWeeklyGrid();
+
+      // 3. Agenda List
+      const agendaContainer = document.getElementById('agendaCardsList');
+      const sortedAll = [...filtered].sort((a,b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
+
+      agendaContainer.innerHTML = sortedAll.map(e => `
+        <div class="p-3.5 rounded-xl bg-obsidian-900 border border-obsidian-750 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="text-center font-mono w-12 py-1 px-1.5 rounded-lg bg-obsidian-950 border border-obsidian-800 flex-shrink-0">
+              <div class="text-[9px] uppercase text-indigo-400 font-bold">${formatDay(e.date)}</div>
+              <div class="text-sm font-bold text-white">${formatDateNum(e.date)}</div>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-white">${escapeHtml(e.title)}</div>
+              <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                <span>${e.startTime || 'All Day'}</span>
+                <span>•</span>
+                <span class="text-slate-300">${escapeHtml(e.location || 'Newcastle Campus')}</span>
+              </div>
+            </div>
+          </div>
+          <div>${getTypeBadge(e.type)}</div>
+        </div>
+      `).join('');
+
+      initLucide();
+    }
+
+    // Helper Badges
+    function getTypeBadge(type) {
+      if (type === 'lecture') return `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">Lecture/Lab</span>`;
+      if (type === 'deadline') return `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">Deadline</span>`;
+      if (type === 'fyp') return `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">CSC3001</span>`;
+      if (type === 'grad') return `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">Grad Career</span>`;
+      return `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">Activity</span>`;
+    }
+
+    function getEventBorder(type) {
+      if (type === 'deadline') return 'border-rose-500/30';
+      if (type === 'fyp') return 'border-emerald-500/30';
+      if (type === 'grad') return 'border-amber-500/30';
+      return 'border-indigo-500/20';
+    }
+    function getEventBg(type) {
+      if (type === 'deadline') return 'bg-rose-500/10';
+      if (type === 'fyp') return 'bg-emerald-500/10';
+      if (type === 'grad') return 'bg-amber-500/10';
+      return 'bg-indigo-500/10';
+    }
+    function getEventTextColor(type) {
+      if (type === 'deadline') return 'text-rose-400';
+      if (type === 'fyp') return 'text-emerald-400';
+      if (type === 'grad') return 'text-amber-400';
+      return 'text-indigo-400';
+    }
+    function getEventIcon(type) {
+      if (type === 'deadline') return 'alert-circle';
+      if (type === 'fyp') return 'cpu';
+      if (type === 'grad') return 'briefcase';
+      return 'book-open';
+    }
+
+    function formatDay(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + "T00:00:00");
+      return d.toLocaleDateString('en-GB', { weekday: 'short' });
+    }
+    function formatDateNum(iso) {
+      if (!iso) return '';
+      const d = new Date(iso + "T00:00:00");
+      return d.getDate();
+    }
+
+    // Render Tasks
+    function renderTasks() {
+      const container = document.getElementById('tasksListContainer');
+      const filtered = tasks.filter(t => {
+        if (selectedTaskCategory === 'all') return true;
+        return t.category === selectedTaskCategory;
+      });
+
+      container.innerHTML = filtered.map(t => `
+        <div class="p-4 rounded-2xl bg-obsidian-900 border ${t.completed ? 'border-emerald-500/20 opacity-70' : 'border-obsidian-750'} space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3">
+              <button onclick="toggleTask('${t.id}')" class="mt-0.5 w-5 h-5 rounded-md border flex items-center justify-center transition ${t.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-600 hover:border-indigo-400 text-transparent'}">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </button>
+              <div>
+                <h4 class="text-xs font-semibold text-white ${t.completed ? 'line-through text-slate-500' : ''}">${escapeHtml(t.title)}</h4>
+                <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-1">
+                  ${t.dueDate ? `<span class="flex items-center gap-1 font-mono"><i data-lucide="calendar" class="w-3 h-3 text-indigo-400"></i> ${t.dueDate}</span>` : ''}
+                  <span class="px-1.5 py-0.2 rounded text-[10px] font-bold uppercase ${t.priority === 'High' ? 'bg-rose-500/20 text-rose-400' : 'bg-slate-700 text-slate-300'}">${t.priority}</span>
+                </div>
+              </div>
+            </div>
+            <button onclick="deleteTask('${t.id}')" class="text-slate-500 hover:text-rose-400 p-1">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Subtasks -->
+          ${(t.subtasks && t.subtasks.length > 0) ? `
+            <div class="space-y-1.5 pl-8 border-t border-obsidian-800/80 pt-2.5">
+              ${t.subtasks.map((st, i) => `
+                <label class="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+                  <input type="checkbox" ${st.done ? 'checked' : ''} onchange="toggleSubtask('${t.id}', ${i})" class="rounded bg-obsidian-950 border-obsidian-700 text-indigo-600 focus:ring-0">
+                  <span class="${st.done ? 'line-through text-slate-500' : ''}">${escapeHtml(st.text)}</span>
+                </label>
+              `).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+      initLucide();
+    }
+
+    function setTaskCategory(cat) {
+      selectedTaskCategory = cat;
+      document.querySelectorAll('.task-cat-btn').forEach(b => {
+        if (b.dataset.cat === cat) {
+          b.classList.add('bg-indigo-600', 'text-white');
+          b.classList.remove('bg-obsidian-900', 'text-slate-300');
+        } else {
+          b.classList.remove('bg-indigo-600', 'text-white');
+          b.classList.add('bg-obsidian-900', 'text-slate-300');
+        }
+      });
+      renderTasks();
+    }
+
+    function toggleTask(id) {
+      const t = tasks.find(x => x.id === id);
+      if (t) {
+        t.completed = !t.completed;
+        persistData();
+        renderTasks();
+        showToast(t.completed ? 'Task completed' : 'Task reopened');
+      }
+    }
+
+    function toggleSubtask(taskId, idx) {
+      const t = tasks.find(x => x.id === taskId);
+      if (t && t.subtasks[idx]) {
+        t.subtasks[idx].done = !t.subtasks[idx].done;
+        persistData();
+        renderTasks();
+      }
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(x => x.id !== id);
+      persistData();
+      renderTasks();
+      showToast('Task removed');
+    }
+
+    function deleteEvent(id) {
+      events = events.filter(x => x.id !== id);
+      persistData();
+      renderTimetable();
+      showToast('Event removed');
+    }
+
+    function updateMetrics() {
+      const pending = tasks.filter(t => !t.completed).length;
+      const done = tasks.filter(t => t.completed).length;
+      document.getElementById('statPendingTasks').innerText = pending;
+      document.getElementById('statDoneTasks').innerText = done;
+    }
+
+    function renderAll() {
+      renderTimetable();
+      renderTasks();
+      updateMetrics();
+    }
+
+    // Modal Operations
+    function openSyncModal() { document.getElementById('syncModal').classList.remove('hidden'); }
+    function closeSyncModal() { document.getElementById('syncModal').classList.add('hidden'); }
+    function openNewTaskModal() { 
+      document.getElementById('itemDate').value = selectedDate;
+      document.getElementById('newTaskModal').classList.remove('hidden'); 
+    }
+    function closeNewTaskModal() { document.getElementById('newTaskModal').classList.add('hidden'); }
+
+    function handleNewItemSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('itemTitle').value.trim();
+      const type = document.getElementById('itemType').value;
+      const priority = document.getElementById('itemPriority').value;
+      const date = document.getElementById('itemDate').value;
+      const time = document.getElementById('itemTime').value;
+      const location = document.getElementById('itemLocation').value.trim();
+      const notes = document.getElementById('itemNotes').value.trim();
+
+      const newEvt = {
+        id: "evt-" + Date.now(),
+        title,
+        type,
+        priority,
+        date,
+        startTime: time || "09:00",
+        endTime: "",
+        location,
+        notes,
+        category: (type === 'grad' || type === 'venture') ? type : 'uni'
+      };
+
+      events.unshift(newEvt);
+
+      // Also create corresponding task if it's a deadline or grad role
+      if (type === 'deadline' || type === 'grad') {
+        tasks.unshift({
+          id: "task-" + Date.now(),
+          title,
+          category: type === 'grad' ? 'grad' : 'uni',
+          priority,
+          dueDate: date,
+          completed: false,
+          subtasks: []
+        });
+      }
+
+      persistData();
+      renderAll();
+      closeNewTaskModal();
+      showToast('Item saved');
+    }
+
+    // LIVE ICAL / WEBCAL FEED SYNC ENGINE (Both Newcastle Timetable & Canvas)
+    async function syncAllFeeds() {
+      const syncBtn = document.getElementById('syncBtn');
+      const syncIcon = document.getElementById('syncIcon');
+      const mbIcon = document.getElementById('mbSyncIcon');
+
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+      if (mbIcon) mbIcon.classList.add('animate-spin');
+      showToast('Connecting to Newcastle & Canvas...');
+
+      const nclUrl = document.getElementById('nclFeedUrl').value.trim();
+      const canvasUrl = document.getElementById('canvasFeedUrl').value.trim();
+
+      let importedCount = 0;
+
+      // 1. Fetch Newcastle Timetable
+      try {
+        const textNcl = await fetchFeedData(nclUrl);
+        importedCount += parseIcs(textNcl, 'ncl');
+      } catch (e) {
+        console.warn('Direct timetable fetch blocked; using offline dataset or proxy', e);
+      }
+
+      // 2. Fetch Canvas LMS
+      try {
+        const textCanvas = await fetchFeedData(canvasUrl);
+        importedCount += parseIcs(textCanvas, 'canvas');
+      } catch (e) {
+        console.warn('Canvas fetch blocked or CORS', e);
+      }
+
+      if (syncIcon) syncIcon.classList.remove('animate-spin');
+      if (mbIcon) mbIcon.classList.remove('animate-spin');
+
+      persistData();
+      renderAll();
+      document.getElementById('lastSyncedLabel').innerText = `Synced at ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+      showToast(importedCount > 0 ? `Synced ${importedCount} items from feeds` : 'Feeds updated');
+    }
+
+    async function fetchFeedData(feedUrl) {
+      let target = feedUrl;
+      if (target.startsWith('webcal://')) {
+        target = 'https://' + target.substring(9);
+      }
+      // Use AllOrigins raw proxy to avoid browser CORS limitation
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error('Fetch failed');
+      return await res.text();
+    }
+
+    function parseIcs(icsText, source) {
+      const lines = icsText.split(/\r\n|\n|\r/);
+      let count = 0;
+      let cur = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        while (i + 1 < lines.length && (lines[i + 1].startsWith(' ') || lines[i + 1].startsWith('\t'))) {
+          line += lines[i + 1].substring(1);
+          i++;
+        }
+
+        if (line.startsWith('BEGIN:VEVENT')) {
+          cur = {};
+        } else if (line.startsWith('END:VEVENT')) {
+          if (cur && cur.title && cur.date) {
+            // Avoid duplicate
+            if (!events.some(e => e.title === cur.title && e.date === cur.date)) {
+              events.push({
+                id: "ics-" + Math.random().toString(36).substring(2, 8),
+                title: cur.title,
+                type: source === 'canvas' ? 'deadline' : 'lecture',
+                date: cur.date,
+                startTime: cur.startTime || '09:00',
+                endTime: cur.endTime || '',
+                location: cur.location || (source === 'canvas' ? 'Canvas Online' : 'Newcastle Campus'),
+                notes: cur.notes || '',
+                category: 'uni',
+                priority: source === 'canvas' ? 'High' : 'Medium'
+              });
+              count++;
+            }
+          }
+          cur = null;
+        } else if (cur) {
+          if (line.startsWith('SUMMARY:')) cur.title = line.substring(8).trim();
+          if (line.startsWith('LOCATION:')) cur.location = line.substring(9).trim().replace(/\\,/g, ',');
+          if (line.startsWith('DESCRIPTION:')) cur.notes = line.substring(12).trim().replace(/\\n/g, ' ');
+          if (line.startsWith('DTSTART')) {
+            const raw = line.split(':')[1];
+            if (raw && raw.length >= 8) {
+              cur.date = `${raw.substring(0,4)}-${raw.substring(4,6)}-${raw.substring(6,8)}`;
+              if (raw.includes('T')) {
+                cur.startTime = `${raw.substring(9,11)}:${raw.substring(11,13)}`;
+              }
+            }
+          }
+          if (line.startsWith('DTEND')) {
+            const raw = line.split(':')[1];
+            if (raw && raw.includes('T')) {
+              cur.endTime = `${raw.substring(9,11)}:${raw.substring(11,13)}`;
+            }
+          }
+        }
+      }
+      return count;
+    }
+
+    function handleIcsUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const added = parseIcs(evt.target.result, 'upload');
+        persistData();
+        renderAll();
+        closeSyncModal();
+        showToast(`Loaded ${added} events from file`);
+      };
+      reader.readAsText(file);
+    }
+
+    // JSON Backup for cross-device transfer
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify({ events, tasks, scratchpad: localStorage.getItem('senith_scratchpad') }, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `senith-command-center-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('JSON Exported');
+    }
+
+    function importBackup(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed.events) events = parsed.events;
+          if (parsed.tasks) tasks = parsed.tasks;
+          if (parsed.scratchpad) {
+            localStorage.setItem('senith_scratchpad', parsed.scratchpad);
+            document.getElementById('hardwareScratchpad').value = parsed.scratchpad;
+          }
+          persistData();
+          renderAll();
+          showToast('Backup restored');
+        } catch(err) {
+          showToast('Invalid file format');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.remove('translate-y-16', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-16', 'opacity-0');
+      }, 2400);
+    }
+
+    function escapeHtml(s) {
+      if (!s) return '';
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>
